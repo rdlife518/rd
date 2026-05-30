@@ -4,40 +4,48 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>豪華文王卦 - AI 智能解卦版</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.6.12/lunar.js"></script>
-    
     <style>
-        :root { --primary: #2563eb; --primary-hover: #1d4ed8; --success: #10b981; --success-hover: #059669; --ai-purple: #7c3aed; --ai-purple-hover: #6d28d9; --bg: #f1f5f9; --text: #1e293b; }
-        body { font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        .container { max-width: 850px; width: 100%; background: white; padding: 35px; border-radius: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; text-align: center; }
-        
-        h1 { color: #1e3a8a; margin: 0 0 10px 0; font-size: 26px; font-weight: 800; }
+        :root { --primary: #2563eb; --success: #10b981; --ai-purple: #7c3aed; --bg: #f1f5f9; --text: #1e293b; }
+        body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .container { max-width: 800px; width: 100%; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
+        h1 { color: #1e3a8a; margin: 0 0 10px 0; font-size: 26px; }
         .subtitle { color: #64748b; font-size: 14px; margin-bottom: 25px; }
         
-        /* 門面輸入框 */
+        /* 階段一：大門輸入 */
         #welcome-stage { text-align: left; max-width: 500px; margin: 0 auto; }
         .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; color: #334155; font-size: 15px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #334155; }
         input[type="text"] { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
-        input[type="text"]:focus { outline: none; border-color: var(--primary); }
         
-        .radio-group { display: flex; gap: 12px; }
-        .radio-label { flex: 1; text-align: center; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; font-weight: bold; background: #fff; }
-        input[type="radio"] { display: none; }
-        input[type="radio"]:checked + .radio-label { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
-
-        /* 起卦室 */
+        /* 階段二：起卦室 */
         #divination-stage { display: none; }
-        .bazi-box { background: #f8fafc; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 14px; margin-bottom: 20px; border: 1px solid #e2e8f0; line-height: 1.6; text-align: left; }
+        .bazi-box { background: #f8fafc; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 14px; margin-bottom: 20px; border: 1px solid #e2e8f0; text-align: left; line-height: 1.6; }
         .user-summary { background: #eff6ff; color: #1e40af; padding: 12px 15px; border-radius: 8px; font-size: 14px; margin-bottom: 15px; text-align: left; border-left: 4px solid var(--primary); font-weight: bold; }
         
-        /* 六爻盤面排版 */
+        /* 六爻盤面 */
         .pan-container { display: none; background: #fff; border: 2px solid #334155; border-radius: 16px; padding: 25px; margin: 20px 0; }
-        .pan-title { font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 12px; }
+        .pan-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 12px; }
         .line-row { display: flex; align-items: center; margin: 14px 0; font-size: 16px; font-weight: bold; min-height: 35px; }
         .cell-liusou { width: 70px; color: #475569; text-align: left; }
         .cell-fushen { width: 130px; color: #2563eb; font-size: 14px; text-align: left; }
         .cell-liuqin { width: 60px; color: #b91c1c; text-align: left; }
         .cell-shiying { width: 40px; color: #2563eb; text-align: center; }
         .cell-graph { width: 110px; display: flex; align-items: center; justify-content: center; }
-        .cell-ganzhi { width: 90px; color: #0
+        .cell-ganzhi { width: 90px; color: #047857; text-align: left; }
+        .cell-dong { width: 50px; color: #ef4444; text-align: center; }
+        .cell-bian { width: 220px; color: #475569; padding-left: 15px; border-left: 1px dashed #cbd5e1; }
+
+        .yang { width: 90px; height: 14px; background-color: #1e293b; }
+        .yin { display: flex; width: 90px; height: 14px; justify-content: space-between; }
+        .yin .part { width: 38px; height: 14px; background-color: #1e293b; }
+
+        /* 按鈕視覺 */
+        .btn { background-color: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; transition: all 0.2s; }
+        .btn:hover { background-color: #1d4ed8; }
+        .btn-cast { background-color: var(--success); }
+        .btn-cast:hover { background-color: #059669; }
+        .btn-ai { background-color: var(--ai-purple); margin-top: 20px; }
+        .btn-ai:hover { background-color: #6d28d9; }
+        
+        /* AI 解卦艙 */
+        .ai-section { display: none; margin-top: 25px; border: 2px dashed var(--ai-purple); border-radius:
