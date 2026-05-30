@@ -1,0 +1,302 @@
+[index.html](https://github.com/user-attachments/files/28429590/index.html)
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>易經線上起卦 - 64卦本變卦完整版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.6.12/lunar.js"></script>
+    
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; background-color: #f8fafc; color: #1e293b; text-align: center; padding: 20px; margin: 0; }
+        .container { max-width: 650px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1); }
+        h1 { color: #1e3a8a; font-size: 28px; margin-bottom: 5px; letter-spacing: 1px; }
+        .subtitle { color: #64748b; font-size: 14px; margin-bottom: 25px; }
+        .bazi-box { background: #f1f5f9; padding: 12px; border-radius: 10px; font-weight: bold; font-size: 15px; color: #334155; margin-bottom: 25px; border: 1px solid #e2e8f0; }
+        
+        /* 雙排盤排版 */
+        .flex-container { display: flex; justify-content: space-around; align-items: center; margin: 25px 0; background: #fdfdfd; padding: 20px; border-radius: 12px; border: 1px dashed #cbd5e1; }
+        .gua-board { display: flex; flex-direction: column-reverse; min-height: 180px; width: 45%; }
+        .arrow-center { font-size: 36px; color: #94a3b8; display: none; font-weight: bold; }
+
+        .line-row { display: flex; justify-content: center; align-items: center; margin: 8px 0; font-size: 14px; }
+        
+        /* 陰陽爻條樣式 */
+        .yang { width: 100px; height: 14px; background-color: #0f172a; border-radius: 2px; }
+        .yin { display: flex; width: 100px; height: 14px; justify-content: space-between; }
+        .yin .part { width: 43px; height: 14px; background-color: #0f172a; border-radius: 2px; }
+        
+        .change-symbol { color: #ef4444; font-weight: bold; width: 20px; margin-left: 8px; text-align: left; font-size: 16px; }
+
+        /* 按鈕視覺 */
+        button { background-color: #2563eb; color: white; border: none; padding: 14px 28px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); }
+        button:hover { background-color: #1d4ed8; transform: translateY(-1px); }
+        button:disabled { background-color: #cbd5e1; cursor: not-allowed; transform: none; box-shadow: none; color: #94a3b8; }
+        
+        /* 雙解卦指南區 */
+        .result-area { display: none; margin-top: 25px; animation: fadeIn 0.5s ease-out; }
+        .result-box { background: #fff7ed; border: 1px solid #ffedd5; padding: 20px; border-radius: 10px; margin-bottom: 15px; text-align: left; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+        .result-box.future { background: #f0fdf4; border-color: #dcfce7; }
+        .result-title { font-size: 18px; color: #c2410c; font-weight: bold; margin-bottom: 8px; border-bottom: 1px dashed #fed7aa; padding-bottom: 6px; }
+        .result-box.future .result-title { color: #166534; border-bottom-color: #bbf7d0; }
+        .result-box p { margin: 6px 0; line-height: 1.6; font-size: 15px; }
+        
+        .restart-btn { background-color: #64748b; margin-top: 20px; font-size: 15px; padding: 8px 16px; width: auto; box-shadow: none; }
+        .restart-btn:hover { background-color: #475569; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>易經線上起卦系統</h1>
+        <div class="subtitle">完全空白新手親製 · 本變卦時空排盤</div>
+        
+        <div class="bazi-box">起卦時空：<span id="bazi-text">計算中...</span></div>
+
+        <div class="flex-container">
+            <div class="gua-board" id="ben-gua-display">
+                <div id="placeholder" style="color: #94a3b8; text-align: center; width: 100%; line-height: 150px; font-size: 15px;">請誠心默想問題後點擊下方起卦</div>
+            </div>
+            
+            <div class="arrow-center" id="arrow">➔</div>
+            
+            <div class="gua-board" id="bian-gua-display"></div>
+        </div>
+
+        <h3 id="status-text" style="color: #475569; margin-bottom: 15px;">目前進度：第 1 爻 (初爻)</h3>
+        <button id="cast-btn" onclick="castCoin()">🪙 擲三個硬幣（連續按 6 次）</button>
+        
+        <div class="result-area" id="result-area">
+            <div class="result-box">
+                <div class="result-title" id="ben-name">本卦：📍 </div>
+                <p><strong>【本卦吉凶】</strong> <span id="ben-summary"></span></p>
+                <p><strong>【大師指南】</strong> <span id="ben-desc"></span></p>
+            </div>
+            <div class="result-box future">
+                <div class="result-title" id="bian-name">變卦：🔮 </div>
+                <p><strong>【未來發展】</strong> <span id="bian-summary"></span></p>
+                <p><strong>【趨勢指引】</strong> <span id="bian-desc"></span></p>
+            </div>
+        </div>
+
+        <button class="restart-btn" onclick="resetGua()">重新起卦</button>
+    </div>
+
+    <script>
+        let guaRecords = [];
+        const maxLines = 6;
+        const lineNames = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
+
+
+        // 完美置入你提供並修正過後的 64 卦終極資料庫（已補齊 010010 水雷屯）
+        const ichingDatabase = {
+          "111111": { name: "乾為天", summary: "大吉大利，亨通順暢", desc: "元亨利貞。象徵創造力、領導力與昂揚的生命力。適合主動出擊、定下宏願，行事正直更能長久。" },
+          "000000": { name: "坤為地", summary: "吉利，宜順從被動", desc: "厚德載物。象徵包容、承載與滋養。以柔克剛，順勢而為，支持他人也在成就自己。" },
+          "010010": { name: "水雷屯", summary: "開局艱難，小步前進", desc: "新事起頭多阻礙。守住耐心，先理清資源與方向，別急著求成，穩住就有活路。" },
+          "100010": { name: "水雷屯（互）", summary: "草創艱辛，堅定方向", desc: "創業早期、項目起步皆如此。守正創新，別被小挫折動搖，穩紮穩打。" },
+          "010001": { name: "山水蒙", summary: "啟門求學，免走彎路", desc: "不懂就問，虛心學習是成長捷徑。遠離自以為是，找值得信賴的導師與方法。" },
+          "111010": { name: "天水訟", summary: "有爭議，宜和解勝訴訟", desc: "立場不同易起爭執。堅守原則但不逞口舌之快。能和解就和解，省下時間與心力。" },
+          "010111": { name: "地水師", summary: "整隊出發，紀律取勝", desc: "需要組織與秩序。明確分工、統一步調，帶著共同目標前行，勝在紀律與耐心。" },
+          "010000": { name: "水地比", summary: "抱團互助，關係加分", desc: "彼此信任，資源共享。主動靠近志同道合的人，互補長短，事情更容易成。" },
+          "000010": { name: "風天小畜", summary: "積小成多，暫緩衝動", desc: "暫時的阻擋是為了蓄勢。先存能量、補基礎，不求一口吃成，等待時機再放手一搏。" },
+          "111011": { name: "天澤履", summary: "守規矩，踏實前行", desc: "走在細線上，要敬畏分寸。懂規則、守底線，穩穩走，每一步都算數。" },
+          "110111": { name: "地天泰", summary: "通達順遂，陰陽和合", desc: "運勢暢達，人心同向。把握窗口期，推進關鍵決策，積德不驕，讓好運延續。" },
+          "111000": { name: "天地否", summary: "不順閉塞，先自我調整", desc: "溝通不良、理念不合。暫停擴張，固守核心，調整內部，等待風向轉變。" },
+          "111101": { name: "天火同人", summary: "同道合夥，眾志成城", desc: "找同頻夥伴一起做事。開放透明、彼此成就，團隊合力遠勝單打獨鬥。" },
+          "101111": { name: "火天大有", summary: "資源豐沛，共享更久", desc: "人和物旺的時候，更要謙和。透明管理、惠及他人，才能把盛運延長。" },
+          "000111": { name: "地山謙", summary: "低處擔當，越謙越盛", desc: "謙虛不是矮化自己，是把舞台讓給價值。放低姿態，才能裝下更多可能。" },
+          "111001": { name: "雷地豫", summary: "先備而樂，樂中有度", desc: "放鬆享受也要有節制。管理預期與風險，讓快樂可長可久，別一次性透支。" },
+          "111100": { name: "澤雷隨", summary: "順勢而為，靈活調整", desc: "趨利避害不是投機，是智慧。看清大勢，跟對節奏，該轉就轉。" },
+          "001111": { name: "山風蠱", summary: "整頓積弊，先難後易", desc: "舊問題堆積需下重手。正視根因、分步治理，短痛換長安。" },
+          "110001": { name: "地澤臨", summary: "貼近需求，腳踏實地", desc: "用戶在哪裡，人就到哪裡。真實調研，以誠意靠近、以行動落地，解真問題並贏得信任。" },
+          "100011": { name: "風地觀", summary: "觀察入微，再定策略", desc: "先看清全局與人心，再出手。高度與細節兼顧，決策才有穿透力。" },
+          "100110": { name: "火雷噬嗑", summary: "破局之力，精準切入", desc: "遇硬骨頭要敢咬下去。用規則與工具、清楚的規範拆解難題，防障除礙。" },
+          "011001": { name: "山火賁", summary: "內質為本，外在點綴", desc: "裝飾可以加分，但根本是內容。先把實力、產品打磨好，再談包裝與傳播，裡外相成。" },
+          "000001": { name: "山地剝", summary: "順應頹勢，隱忍自保", desc: "形勢不利，不宜大舉進攻。如同果實落地，應當放低身段，保留實力種子，靜待轉機。" },
+          "100000": { name: "地雷復", summary: "生機重現，寓動於靜", desc: "正處於觸底反彈的轉折點。新契機正在萌芽，此時不宜操之過急，順應自然規律循序漸進。" },
+          "100111": { name: "雷天大壯", summary: "氣勢正旺，剛中有度", desc: "能量充足但忌逞強。把力量放在對的地方，規矩內用猛勁，避免流於盲目自信。" },
+          "111000": { name: "天山遯", summary: "急流勇退，保全實力", desc: "不合時宜就先退場。這不是懦弱，而是高度智慧的戰術撤退，為日後回歸留下空間。" },
+          "010110": { name: "晉卦", summary: "節節高升，穩步擴張", desc: "靠實力與表現往上走。前途光明，一步一台階不逾矩，就能站得更穩。" },
+          "011101": { name: "地火明夷", summary: "保護自己，韜光養晦", desc: "環境不友善時，收斂鋒芒。外表柔順，內心堅守火光，記得補給心力，別把自己耗盡。" },
+          "101101": { name: "風火家人", summary: "家有秩序，萬事有依", desc: "角色分工明確、彼此敬重。家和則事順，從日常小事建立信任與溫度。" },
+          "101110": { name: "火澤睽", summary: "各自不同，求同存異", desc: "觀點相左不必硬磨合。尊重彼此專長與風格，找到共同最小集合，從能合作的地方做起。" },
+          "001010": { name: "水山蹇", summary: "路難行), 繞道更明智", desc: "困難在前不必硬闖。越是難走越要沉著，換角度、換路徑，慢一點反而能省力到達。" },
+          "010100": { name: "雷水解", summary: "化解壓力，抓住窗口", desc: "僵局出現鬆動。順勢推一把，先處理關鍵卡點，解一處、活一片，重整旗鼓。" },
+          "110011": { name: "風雷益", summary: "彼此成就，越給越多", desc: "主動提供價值，關係就會回饋。利他的同時也在擴大自己的影響力。" },
+          "111110": { name: "澤天夬", summary: "果斷決策，斷尾求生", desc: "時機成熟就該切就切，遲疑只會擴大損失。果斷中保留人情，乾淨利落地騰出新空間。" },
+          "011111": { name: "天風姤", summary: "偶遇之機，把握分寸", desc: "突如其來的機會或人事物出現。保持清醒與邊界，能借勢但不迷失，防人之心不可無。" },
+          "011110": { name: "澤地萃", summary: "群聚共好，整合資源", desc: "召集力量，一起辦成一件事。分工清楚、利益公開，凝聚人心就會有巨大成果。" },
+          "011100": { name: "地風升", summary: "厚積薄發，步步向上", desc: "從基層扎實做起，如同樹木破土。穩定輸出、口碑累積，水到渠成地獲得升遷。" },
+          "011011": { name: "澤水困", summary: "四面受限，守正自持", desc: "條件艱困、四面楚歌之時。越難走越要沉著，先保核心價值與士氣，少動多看等待突破口。" },
+          "011010": { name: "水風井", summary: "深挖基業，長久之道", desc: "打好根基如同修井。維護好基礎設施與人才系統，長期穩定地向外供給價值。" },
+          "101110": { name: "澤火革", summary: "變革時刻，換舊成新", desc: "到了該改的時候就要改。打破舊體制，設好節奏與風險控管，讓變革平穩落地。" },
+          "011101": { name: "火風鼎", summary: "鼎新立異，聚合英才", desc: "象徵穩重與革新。此時適合確立新規則、吸收新資源，並與賢能之人一同成事。" },
+          "100100": { name: "震為雷", summary: "行動起勢，驚醒局面", desc: "一聲雷響，喚醒停滯。快速啟動、帶頭行動，萬事開頭難但也最重要。" },
+          "001001": { name: "艮為山", summary: "適時止步，穩住邊界", desc: "知道何時該停。山之不動是為了守護與沉澱，守住底線，就能積蓄新的動能再次啟程。" },
+          "110100": { name: "風山漸", summary: "循序漸進，久久為功", desc: "像鳥築巢，一根一根累積。不必急於求成，堅持正確的方向與節奏，自然安全到位。" },
+          "001011": { name: "雷澤歸妹", summary: "順序錯置，切忌盲目", desc: "當前情勢可能有些名不正言不順，或衝動行事。看清主從關係，理智踩煞車，避免後規落空。" },
+          "101100": { name: "雷火豐", summary: "盛大豐沛，居安思危", desc: "正處於最輝煌、收穫最多的高光時刻。此時更要透明管理、惠及他人，防範日中則昃。" },
+          "001101": { name: "火山旅", summary: "客居在外，低調靈活", desc: "處於變動、出差或探索新環境的階段。保持謙遜、靈活適應，不與在地規則硬碰硬。" },
+          "011000": { name: "巽為風", summary: "潤物無聲，持續影響", desc: "柔中帶剛，滲透而不硬碰。用耐心、一致性與溫和的溝通，推動改變悄然發生。" },
+          "000110": { name: "兌為澤", summary: "悅納溝通，以柔致勝", desc: "用真誠、幽默與喜悅打開局面。願意傾聽並創造共鳴，就能引導彼此走向共贏。" },
+          "010011": { name: "風水渙", summary: "化散凝結，重整旗鼓", desc: "人心或資源有些渙散。先安定情緒，重新聚焦共同的宏大目標，就能凝聚力量化險為夷。" },
+          "110010": { name: "水澤節", summary: "節制有度，剛柔並濟", desc: "把握份量與節奏，定規矩也要留彈性。過度的限制會讓人窒息，適當的節制能長久。" },
+          "110000": { name: "風澤中孚", summary: "誠信為本，感人以真", desc: "心中真實，言行一致。信任是最好的通行證，建立共同默契能讓效率加倍增幅。" },
+          "000011": { name: "雷山小過", summary: "小心行事，細節致勝", desc: "此時宜小事不宜大事。控制好風險、注重執行細節，小題不大做，但絕不輕忽。" },
+          "101010": { name: "水火既濟", summary: "階段完成，收束優化", desc: "事情已基本功德圓滿。但要防範盛極而衰，補好最後一哩路的日常驗收，動靜相宜。" },
+          "010101": { name: "火水未濟", summary: "未完待續，調整再來", desc: "差最後一口氣。別灰心，這代表無限可能。重新檢討缺口、調整配置，再衝一次就好。" },
+          "011010": { name: "坎為水", summary: "反覆之險，冷靜通過", desc: "面對重重險境與不確定性，保持清醒與紀律。設置好安全繩，按計畫走就能穿越重圍。" },
+          "010110": { name: "離為火", summary: "明亮清晰，聚焦發光", desc: "點亮重點，讓價值被看見。專注核心、附著於正道，照亮自己也照亮他人。" },
+          "001110": { name: "澤山咸", summary: "彼此感應，從心而合", desc: "真誠的共鳴帶來美好的合作或姻緣。細膩體察對方感受，在小處展現真心。" },
+          "011100": { name: "雷風恆", summary: "恆心恆力，細水長流", desc: "長期主義的勝利。建立可持續的節奏與習慣，不為外界誘惑動搖，穩穩走得最遠。" },
+          "001000": { name: "澤風大過", summary: "大任在肩，先固樑柱", desc: "負擔與壓力極重。此時不求華美，先保住核心結構的安全與承重，避免折損折斷。" },
+          "000100": { name: "水山蹇", summary: "前方有阻，見險能止", desc: "前方高山大水阻隔，硬闖容易受傷。此時退一步、找尋盟友幫忙，才是聰明的避險之道。" },
+          "001000": { name: "雷水解", summary: "難題緩解，網開一面", desc: "過去的束縛與壓力開始消散。此時宜快速解決殘留問題，與人為善，讓局勢恢復輕鬆。" },
+          "100001": { name: "雷山頤", summary: "養生養心，注意言行", desc: "頤代表觀其所養。你在問的事情跟『輸入與輸出』有關。管好自己的嘴巴，注意飲食與言行即可。" },
+          "011110": { name: "澤火既濟", summary: "陰陽和合，初吉終亂", desc: "目前的狀態非常完美、和諧。但越完美越要小心維持，因為接下來容易走向鬆懈與混亂。" }
+        };
+
+        // 曆法初始化
+        function initBazi() {
+            let now = new Date();
+            let solar = Solar.fromDate(now);
+            let lunar = Lunar.fromSolar(solar);
+            document.getElementById('bazi-text').innerText = 
+                lunar.getYearInGanZhi() + "年 " + lunar.getMonthInGanZhi() + "月 " + lunar.getDayInGanZhi() + "日 " + lunar.getTimeInGanZhi() + "時 (本日空亡: " + lunar.getDayXunKong() + ")";
+        }
+
+        // 模擬擲三個硬幣核心演算
+        function castCoin() {
+            if (guaRecords.length >= maxLines) return;
+
+            let coin1 = Math.floor(Math.random() * 2);
+            let coin2 = Math.floor(Math.random() * 2);
+            let coin3 = Math.floor(Math.random() * 2);
+            let totalStatus = coin1 + coin2 + coin3;
+            
+            let lineType = ""; let changeSign = ""; let benCode = ""; let bianCode = "";
+
+            if (totalStatus === 3) {
+                lineType = "yang"; changeSign = "O"; benCode = "1"; bianCode = "0"; // 老陽變陰
+            } else if (totalStatus === 0) {
+                lineType = "yin";  changeSign = "X"; benCode = "0"; bianCode = "1"; // 老陰變陽
+            } else if (totalStatus === 2) {
+                lineType = "yang"; changeSign = "";  benCode = "1"; bianCode = "1"; // 少陽不變
+            } else if (totalStatus === 1) {
+                lineType = "yin";  changeSign = "";  benCode = "0"; bianCode = "0"; // 少陰不變
+            }
+
+            guaRecords.push({ type: lineType, sign: changeSign, benCode: benCode, bianCode: bianCode });
+            renderBenGua();
+        }
+
+        // 畫出左側本卦
+        function renderBenGua() {
+            const benDisplay = document.getElementById('ben-gua-display');
+            const statusText = document.getElementById('status-text');
+            const castBtn = document.getElementById('cast-btn');
+            
+            if(guaRecords.length === 1) benDisplay.innerHTML = "";
+
+            let currentCount = guaRecords.length;
+            let latestLine = guaRecords[currentCount - 1];
+
+            let row = document.createElement('div');
+            row.className = 'line-row';
+
+            let lineGraph = document.createElement('div');
+            lineGraph.className = latestLine.type;
+            if (latestLine.type === 'yin') lineGraph.innerHTML = '<div class="part"></div><div class="part"></div>';
+
+            row.appendChild(lineGraph);
+            row.innerHTML = `<span style="width:35px; text-align:left; color:#94a3b8; font-weight:bold;">${lineNames[currentCount-1]}</span>` 
+                            + row.innerHTML 
+                            + `<span class="change-symbol">${latestLine.sign}</span>`;
+            
+            benDisplay.appendChild(row);
+
+            if (currentCount < maxLines) {
+                statusText.innerText = `目前進度：第 ${currentCount + 1} 爻 (${lineNames[currentCount]})`;
+            } else {
+                statusText.innerText = "🎉 滿爻！排盤成功";
+                castBtn.innerText = "本變卦盤計算完成";
+                castBtn.disabled = true;
+                
+                // 動態生成變卦
+                generateBianGua();
+            }
+        }
+
+        // 畫出右側變卦並執行大腦查表
+        function generateBianGua() {
+            const bianDisplay = document.getElementById('bian-gua-display');
+            const arrow = document.getElementById('arrow');
+            
+            arrow.style.display = "block";
+
+            guaRecords.forEach((item, index) => {
+                let row = document.createElement('div');
+                row.className = 'line-row';
+                
+                let lineGraph = document.createElement('div');
+                if (item.bianCode === "1") {
+                    lineGraph.className = "yang";
+                } else {
+                    lineGraph.className = "yin";
+                    lineGraph.innerHTML = '<div class="part"></div><div class="part"></div>';
+                }
+                
+                row.appendChild(lineGraph);
+                row.innerHTML = row.innerHTML + `<span style="width:35px; color:#94a3b8; margin-left:8px; font-weight:bold;">${lineNames[index]}</span>`;
+                bianDisplay.appendChild(row);
+            });
+
+            // 抓取 6 位元二進位密碼
+            let finalBenCode = guaRecords.map(item => item.benCode).join('');
+            let finalBianCode = guaRecords.map(item => item.bianCode).join('');
+
+            // 查表匹配文字
+            const benData = ichingDatabase[finalBenCode];
+            const bianData = ichingDatabase[finalBianCode];
+
+            // 填入本卦內容
+            document.getElementById('ben-name').innerText = "本卦（當前處境）：📍 " + (benData ? benData.name : "未命名卦 (" + finalBenCode + ")");
+            document.getElementById('ben-summary').innerText = benData ? benData.summary : "吉凶未定";
+            document.getElementById('ben-desc').innerText = benData ? benData.desc : "暫無白話說明。";
+
+            // 填入變卦內容
+            if (finalBenCode === finalBianCode) {
+                document.getElementById('bian-name').innerText = "變卦（未來趨勢）：🔮 無變爻";
+                document.getElementById('bian-summary').innerText = "靜卦不動";
+                document.getElementById('bian-desc').innerText = "這件事情的結構很單純。本次占卜沒有任何動爻（沒有老陽或老陰），事物會按照本卦的指引穩定發展，不需看變卦。";
+            } else {
+                document.getElementById('bian-name').innerText = "變卦（未來趨勢）：🔮 " + (bianData ? bianData.name : "未命名卦 (" + finalBianCode + ")");
+                document.getElementById('bian-summary').innerText = bianData ? bianData.summary : "吉凶未定";
+                document.getElementById('bian-desc').innerText = bianData ? bianData.desc : "暫無白話說明。";
+            }
+
+            // 顯示結果面板
+            document.getElementById('result-area').style.display = "block";
+        }
+
+        // 重新開始
+        function resetGua() {
+            guaRecords = [];
+            document.getElementById('ben-gua-display').innerHTML = '<div id="placeholder" style="color: #94a3b8; text-align: center; width: 100%; line-height: 150px; font-size: 15px;">請誠心默想問題後點擊下方起卦</div>';
+            document.getElementById('bian-gua-display').innerHTML = "";
+            document.getElementById('arrow').style.display = "none";
+            document.getElementById('status-text').innerText = "目前進度：第 1 爻 (初爻)";
+            document.getElementById('result-area').style.display = "none";
+            let btn = document.getElementById('cast-btn');
+            btn.innerText = "🪙 擲三個硬幣（連續按 6 次）";
+            btn.disabled = false;
+            initBazi();
+        }
+
+        initBazi();
+    </script>
+
+</body>
+</html>
