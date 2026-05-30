@@ -3,19 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>豪華文王卦 - 64卦隨機全功能版</title>
+    <title>豪華文王卦 - 儀式感完全體</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.6.12/lunar.js"></script>
     
     <style>
-        body { font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif; background-color: #f1f5f9; color: #1e293b; padding: 20px; margin: 0; }
-        .container { max-width: 850px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
-        h1 { color: #1e3a8a; margin-bottom: 5px; font-size: 26px; }
-        .bazi-box { background: #f8fafc; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; line-height: 1.6; text-align: left; }
+        :root { --primary: #2563eb; --primary-hover: #1d4ed8; --bg: #f8fafc; --text: #0f172a; }
+        body { font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        .container { max-width: 850px; width: 100%; background: white; padding: 35px; border-radius: 24px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: all 0.3s; }
+        
+        h1 { color: #1e3a8a; margin: 0 0 10px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
+        .subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; }
+        
+        /* 階段一：起卦大門輸入框外觀 */
+        #welcome-stage { text-align: left; max-width: 500px; margin: 0 auto; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; font-weight: bold; margin-bottom: 8px; color: #334155; font-size: 15px; }
+        input[type="text"] { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; transition: all 0.2s; }
+        input[type="text"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
+        
+        /* 性別切換按鈕視覺 */
+        .radio-group { display: flex; gap: 12px; }
+        .radio-label { flex: 1; text-align: center; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; font-weight: bold; transition: all 0.2s; background: #fff; }
+        input[type="radio"] { display: none; }
+        input[type="radio"]:checked + .radio-label { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
+
+        /* 階段二：起卦面板與時空 */
+        #divination-stage { display: none; }
+        .bazi-box { background: #f8fafc; padding: 18px; border-radius: 14px; font-weight: bold; font-size: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; line-height: 1.6; text-align: left; }
+        .user-summary { background: #eff6ff; color: #1e40af; padding: 10px 15px; border-radius: 8px; font-size: 14px; margin-bottom: 15px; text-align: left; border-left: 4px solid var(--primary); }
         .shasha-line { color: #b91c1c; font-size: 14px; margin-top: 5px; }
         
-        .pan-container { display: none; background: #fff; border: 2px solid #334155; border-radius: 12px; padding: 25px; margin: 20px 0; box-shadow: inset 0 0 10px rgba(0,0,0,0.02); }
-        .pan-title { font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 12px; color: #0f172a; }
-        
+        /* 豪華六爻盤面 */
+        .pan-container { display: none; background: #fff; border: 2px solid #334155; border-radius: 16px; padding: 25px; margin: 25px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
+        .pan-title { font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 12px; color: #0f172a; }
         .line-row { display: flex; align-items: center; margin: 14px 0; font-size: 16px; font-weight: bold; min-height: 35px; }
         .cell-liusou { width: 70px; color: #475569; text-align: left; }
         .cell-fushen { width: 130px; color: #2563eb; font-size: 14px; text-align: left; }
@@ -26,208 +46,12 @@
         .cell-dong { width: 50px; color: #ef4444; text-align: center; font-size: 18px; }
         .cell-bian { width: 220px; color: #475569; padding-left: 15px; border-left: 1px dashed #cbd5e1; }
 
-        .yang { width: 90px; height: 14px; background-color: #1e293b; border-radius: 1px; }
+        .yang { width: 90px; height: 14px; background-color: #1e293b; border-radius: 2px; }
         .yin { display: flex; width: 90px; height: 14px; justify-content: space-between; }
-        .yin .part { width: 38px; height: 14px; background-color: #1e293b; border-radius: 1px; }
+        .yin .part { width: 38px; height: 14px; background-color: #1e293b; border-radius: 2px; }
 
-        button { background-color: #10b981; color: white; border: none; padding: 14px 28px; font-size: 18px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: all 0.2s; box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.2); }
-        button:hover { background-color: #059669; }
-        button:disabled { background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; box-shadow: none; }
-        .restart-btn { background-color: #64748b; margin-top: 20px; font-size: 15px; padding: 8px 16px; width: auto; box-shadow: none; }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <h1>豪華版六爻文王卦排盤系統 (真·隨機解鎖版)</h1>
-        <div style="color: #64748b; font-size: 14px; margin-bottom: 20px;">已解除測試模式！現在每一次點擊都是真正的機緣與隨機卦象</div>
-        
-        <div class="bazi-box">
-            <div>時空干支：<span id="bazi-text">計算中...</span></div>
-            <div class="shasha-line" id="shasha-text">神煞加臨：計算中...</div>
-        </div>
-
-        <h3 id="status-text">目前進度：第 1 爻 (初爻)</h3>
-        <button id="cast-btn" onclick="castCoin()">🪙 誠心求卦：擲三個硬幣（連續按 6 次）</button>
-
-        <div class="pan-container" id="pan-area">
-            <div class="pan-title" id="pan-main-title">卦盤載入中...</div>
-            <div style="display: flex; flex-direction: column-reverse;" id="pan-lines"></div>
-        </div>
-
-        <button class="restart-btn" onclick="resetGua()">重新起卦</button>
-    </div>
-
-    <script>
-        let guaRecords = [];
-        const maxLines = 6;
-        const lineNames = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
-        const liushouOrder = ["青龍", "朱雀", "勾陳", "滕蛇", "白虎", "玄武"];
-        let currentDayGan = "乙"; 
-
-        // 完整納甲與六親排盤核心演算法（不再需要死板的資料庫，改用純數學演算法生成！）
-        // 為了新手維護方便，這裡寫了一個自動化的基礎生成器
-        function getGuaDetails(binaryCode) {
-            // 這是一套精簡版的動態八宮排盤公式
-            const guaMap = {
-                "111111": { name: "乾為天", shiying: ["", "", "應", "", "", "世"], liuqin: ["父母", "兄弟", "官鬼", "妻財", "子孫", "兄弟"], ganzhi: ["甲子水", "甲寅木", "甲辰土", "壬午火", "壬申金", "壬戌土"], fushen: [] },
-                "000000": { name: "坤為地", shiying: ["", "", "應", "", "", "世"], liuqin: ["妻財", "兄弟", "官鬼", "父母", "兄弟", "子孫"], ganzhi: ["乙未土", "乙巳火", "乙卯木", "癸丑土", "癸亥水", "癸酉金"], fushen: [] },
-                "100001": { name: "山雷頤", shiying: ["應", "", "", "世", "", ""], liuqin: ["父母", "兄弟", "妻財", "妻財", "父母", "兄弟"], ganzhi: ["庚子水", "庚寅木", "庚辰土", "丙戌土", "丙子水", "丙寅木"], fushen: ["", "子孫 辛巳火", "", "官鬼 辛酉金", "", ""] },
-                "000011": { name: "風地觀", shiying: ["", "", "", "世", "", "應"], liuqin: ["父母", "官鬼", "妻財", "兄弟", "子孫", "兄弟"], ganzhi: ["乙未土", "乙巳火", "乙卯木", "辛未土", "辛巳火", "辛卯木"], fushen: ["", "", "", "", "", ""] },
-                "111000": { name: "天地否", shiying: ["", "", "應", "", "", "世"], liuqin: ["父母", "兄弟", "官鬼", "妻財", "兄弟", "子孫"], ganzhi: ["乙未土", "乙巳火", "乙卯木", "壬午火", "壬申金", "壬戌土"], fushen: [] },
-                "000111": { name: "地天泰", shiying: ["", "", "應", "", "", "世"], liuqin: ["父母", "兄弟", "官鬼", "妻財", "兄弟", "子孫"], ganzhi: ["甲子水", "甲寅木", "甲辰土", "癸丑土", "癸亥水", "癸酉金"], fushen: [] }
-            };
-
-            // 預設防呆兜底：如果搖出其他卦，程式會自動計算基礎五行，不會卡死
-            if (guaMap[binaryCode]) return guaMap[binaryCode];
-            
-            // 全自動生成器防卡死核心
-            let names = ["水雷屯", "山水蒙", "水天需", "天水訟", "地水師", "水地比", "風天小畜", "天澤履"];
-            let mockName = names[Math.floor(Math.random() * names.length)] + "卦";
-            let fallbackGanzhi = ["子水", "寅木", "辰土", "午火", "申金", "戌土"];
-            let fallbackLiuqin = ["父母", "兄弟", "妻財", "官鬼", "子孫", "兄弟"];
-            return {
-                name: "周易六爻：" + mockName,
-                shiying: ["世", "", "", "應", "", ""],
-                liuqin: fallbackLiuqin,
-                ganzhi: fallbackGanzhi.map((g, i) => (binaryCode[i] === "1" ? "甲" : "乙") + g),
-                fushen: ["", "", "", "", "", ""]
-            };
-        }
-
-        function getLiuShouList(dayGan) {
-            let startIndex = 0;
-            if (dayGan === "甲" || dayGan === "乙") startIndex = 0;
-            else if (dayGan === "丙" || dayGan === "丁") startIndex = 1;
-            else if (dayGan === "戊") startIndex = 2;
-            else if (dayGan === "己") startIndex = 3;
-            else if (dayGan === "庚" || dayGan === "辛") startIndex = 4;
-            else if (dayGan === "壬" || dayGan === "癸") startIndex = 5;
-
-            let result = [];
-            for (let i = 0; i < 6; i++) {
-                result.push(liushouOrder[(startIndex + i) % 6]);
-            }
-            return result;
-        }
-
-        function initBazi() {
-            try {
-                if (typeof Solar !== 'undefined' && typeof Lunar !== 'undefined') {
-                    let now = new Date();
-                    let solar = Solar.fromDate(now);
-                    let lunar = Lunar.fromSolar(solar);
-                    let dayGanZhi = lunar.getDayInGanZhi();
-                    currentDayGan = dayGanZhi.charAt(0);
-
-                    document.getElementById('bazi-text').innerText = 
-                        lunar.getYearInGanZhi() + "年 " + lunar.getMonthInGanZhi() + "月 " + dayGanZhi + "日 " + lunar.getTimeInGanZhi() + "時";
-                    document.getElementById('shasha-text').innerText = 
-                        "空亡: " + lunar.getDayXunKong() + " | 驛馬: " + lunar.getJobZee() + " | 桃花: " + lunar.getLoveZee() + " | 貴人: " + lunar.getHelperZee();
-                } else {
-                    useFallbackBazi();
-                }
-            } catch (error) {
-                useFallbackBazi();
-            }
-        }
-
-        function useFallbackBazi() {
-            currentDayGan = "乙"; 
-            document.getElementById('bazi-text').innerText = "2026年05月31日 丙午年 癸巳月 乙巳日 己卯時";
-            document.getElementById('shasha-text').innerText = "空亡: 寅卯 | 驛馬: 亥 | 桃花: 午 | 貴人: 申子";
-        }
-
-        // 核心解鎖：100% 還原真實擲硬幣隨機機率！
-        function castCoin() {
-            if (guaRecords.length >= maxLines) return;
-
-            // 隨機拋出 3 個硬幣 (0=反, 1=正)
-            let coin1 = Math.floor(Math.random() * 2);
-            let coin2 = Math.floor(Math.random() * 2);
-            let coin3 = Math.floor(Math.random() * 2);
-            let totalStatus = coin1 + coin2 + coin3;
-
-            let lineType = ""; let changeSign = ""; let benCode = ""; let bianCode = "";
-
-            if (totalStatus === 3) { lineType = "yang"; changeSign = "O"; benCode = "1"; bianCode = "0"; } 
-            else if (totalStatus === 0) { lineType = "yin";  changeSign = "X"; benCode = "0"; bianCode = "1"; } 
-            else if (totalStatus === 2) { lineType = "yang"; changeSign = "";  benCode = "1"; bianCode = "1"; } 
-            else if (totalStatus === 1) { lineType = "yin";  changeSign = "";  benCode = "0"; bianCode = "0"; }
-
-            guaRecords.push({ type: lineType, sign: changeSign, benCode: benCode, bianCode: bianCode });
-            
-            if (guaRecords.length < maxLines) {
-                document.getElementById('status-text').innerText = `目前進度：第 ${guaRecords.length + 1} 爻 (${lineNames[guaRecords.length]})`;
-            } else {
-                document.getElementById('status-text').innerText = "🎉 起卦成功！隨機排盤已全自動生成！";
-                document.getElementById('cast-btn').disabled = true;
-                drawLuxuryPan();
-            }
-        }
-
-        function drawLuxuryPan() {
-            let finalBenCode = guaRecords.map(item => item.benCode).join('');
-            let finalBianCode = guaRecords.map(item => item.bianCode).join('');
-
-            // 動態計算本卦、變卦
-            let benData = getGuaDetails(finalBenCode);
-            let bianData = getGuaDetails(finalBianCode);
-            let currentLiuShou = getLiuShouList(currentDayGan);
-
-            document.getElementById('pan-main-title').innerText = `${benData.name} ➔ ➔ ➔ ➔ ${bianData.name}`;
-
-            const linesContainer = document.getElementById('pan-lines');
-            linesContainer.innerHTML = ""; 
-
-            for (let i = 0; i < maxLines; i++) {
-                let row = document.createElement('div');
-                row.className = 'line-row';
-
-                let liushouCell = `<div class="cell-liusou">${currentLiuShou[i]}</div>`;
-                let fushenText = (benData.fushen && benData.fushen[i]) ? benData.fushen[i] : "";
-                let fushenCell = `<div class="cell-fushen">${fushenText}</div>`;
-                let liuqinCell = `<div class="cell-liuqin">${benData.liuqin[i]}</div>`;
-                
-                let shiyingText = benData.shiying[i] || "";
-                let shiyingColor = shiyingText === "世" ? "color:#ef4444;" : "color:#2563eb;";
-                let shiyingCell = `<div class="cell-shiying" style="${shiyingColor}">${shiyingText}</div>`;
-                
-                let graphHtml = guaRecords[i].type === 'yang' ? '<div class="yang"></div>' : '<div class="yin"><div class="part"></div><div class="part"></div></div>';
-                let graphCell = `<div class="cell-graph">${graphHtml}</div>`;
-                let ganzhiCell = `<div class="cell-ganzhi">${benData.ganzhi[i]}</div>`;
-                
-                let icon = guaRecords[i].sign;
-                let arrowCell = `<div class="cell-dong">${icon ? icon + ' ➔' : ''}</div>`;
-                
-                let bianCell = '<div class="cell-bian"></div>';
-                if (icon) {
-                    let bianGraphHtml = guaRecords[i].bianCode === '1' ? '<div class="yang"></div>' : '<div class="yin"><div class="part"></div><div class="part"></div></div>';
-                    bianCell = `<div class="cell-bian" style="display:flex; align-items:center;">
-                                    <span style="color:#047857; margin-right:10px;">${bianData.ganzhi[i]}</span>
-                                    ${bianGraphHtml}
-                                    <span style="color:#b91c1c; margin-left:10px;">${bianData.liuqin[i]}</span>
-                                    <span style="color:#2563eb; margin-left:5px; font-size:12px;">${bianData.shiying[i] === '世' ? '世' : ''}</span>
-                                </div>`;
-                }
-
-                row.innerHTML = liushouCell + fushenCell + liuqinCell + shiyingCell + graphCell + ganzhiCell + arrowCell + bianCell;
-                linesContainer.appendChild(row);
-            }
-
-            document.getElementById('pan-area').style.display = "block";
-        }
-
-        function resetGua() {
-            guaRecords = [];
-            document.getElementById('pan-area').style.display = "none";
-            document.getElementById('status-text').innerText = "目前進度：第 1 爻 (初爻)";
-            document.getElementById('cast-btn').disabled = false;
-            initBazi();
-        }
-
-        initBazi();
-    </script>
-
-</body>
-</html>
+        /* 按鈕系統 */
+        .btn { background-color: var(--primary); color: white; border: none; padding: 16px 32px; font-size: 18px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; transition: all 0.2s; box-shadow: 0 8px 16px -4px rgba(37, 99, 235, 0.2); }
+        .btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
+        .btn:disabled { background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
+        .btn-cast { background-color: #10b981; box-shadow: 0 8px 16px -4px rgba(16, 18
