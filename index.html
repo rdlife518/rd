@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>易經線上起卦 - 最終完成版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.6.12/lunar.js"></script>
+    
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; color: #333; text-align: center; padding: 30px; }
+        .container { max-width: 500px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h1 { color: #1e3a8a; margin-bottom: 20px; }
+        .bazi-box { background: #eff6ff; padding: 10px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; }
+        
+        .gua-container { display: flex; flex-direction: column-reverse; margin: 20px 0; min-height: 180px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px dashed #ccc; }
+        .line-row { display: flex; justify-content: center; align-items: center; margin: 6px 0; font-size: 16px; }
+        
+        .yang { width: 120px; height: 12px; background-color: #1e293b; margin-right: 15px; }
+        .yin { display: flex; width: 120px; height: 12px; margin-right: 15px; justify-content: space-between; }
+        .yin .part { width: 50px; height: 12px; background-color: #1e293b; }
+        
+        .change-symbol { color: #e11d48; font-weight: bold; width: 30px; text-align: left; }
+        .line-text { color: #666; width: 80px; text-align: left; }
+
+        button { background-color: #2563eb; color: white; border: none; padding: 12px 24px; font-size: 18px; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        button:hover { background-color: #1d4ed8; }
+        button:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+        
+        /* 卦解顯示區域 */
+        .result-box { display: none; background: #fff7ed; border: 2px solid #fed7aa; padding: 20px; border-radius: 8px; margin-top: 20px; text-align: left; }
+        .result-title { font-size: 22px; color: #c2410c; font-weight: bold; margin-bottom: 10px; text-align: center; }
+        .restart-btn { background-color: #64748b; margin-top: 15px; font-size: 14px; padding: 6px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>易經線上起卦系統</h1>
+        
+        <div class="bazi-box">
+            起卦時間：<span id="bazi-text">計算中...</span>
+        </div>
+
+        <p style="color: #666; font-size: 14px;">請誠心冥想問題，並點擊下方按鈕擲硬幣</p>
+        
+        <div class="gua-container" id="gua-display">
+            <div style="color: #aaa; text-align: center; width: 100%; line-height: 150px;">暫無卦象，請點擊下方按鈕起卦</div>
+        </div>
+
+        <h3 id="status-text">目前進度：第 1 爻 (初爻)</h3>
+        <button id="cast-btn" onclick="castCoin()">🪙 擲三個硬幣</button>
+        
+        <div class="result-box" id="result-box">
+            <div class="result-title" id="gua-name">乾為天</div>
+            <p><strong>【本卦吉凶】</strong> <span id="gua-summary">吉凶說明</span></p>
+            <p><strong>【白話解說】</strong> <span id="gua-desc">詳細解釋文字</span></p>
+        </div>
+
+        <button class="restart-btn" onclick="resetGua()">重新起卦</button>
+    </div>
+
+    <script>
+        let guaRecords = [];
+        const maxLines = 6;
+        const lineNames = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
+
+        // 易經密碼本（JSON 資料庫示範，這裡先放 4 個，你可以自己補齊或叫 AI 幫你寫完 64 個）
+        const ichingDatabase = {
+            "111111": { name: "乾為天", summary: "大吉大利，亨通順暢", desc: "元亨利貞。代表極致的陽剛與動力。此卦暗示時機大好，應如飛龍在天般積極進取，但也要注意物極必反，保持謙遜。" },
+            "000000": { name: "坤為地", summary: "吉利，宜順從被動", desc: "柔順包容。代表大地母親的力量。現在不宜強出頭，當個跟隨者、配合他人、默默耕耘反而會獲得巨大的成功。" },
+            "100001": { name: "山雷頤", summary: "平中有險，注意言行", desc: "頤代表養育、嘴巴。你在問的事情跟『飲食、說話、養活自己』有關。管好自己的嘴巴（不亂說話、不亂吃），細心觀察生活，就能化險為夷。" },
+            "000011": { name: "地風升", summary: "吉，如樹木生長，步步高升", desc: "代表積小成大，像樹木從土裡鑽出來往上長。做這件事會有貴人相助，雖然不是一夕發財，但會非常穩健地往上發展。" }
+        };
+
+        function initBazi() {
+            let now = new Date();
+            let solar = Solar.fromDate(now);
+            let lunar = Lunar.fromSolar(solar);
+            document.getElementById('bazi-text').innerText = 
+                lunar.getYearInGanZhi() + "年 " + lunar.getMonthInGanZhi() + "月 " + lunar.getDayInGanZhi() + "日 " + lunar.getTimeInGanZhi() + "時 (空亡:" + lunar.getDayXunKong() + ")";
+        }
+
+        function castCoin() {
+            if (guaRecords.length >= maxLines) return;
+
+            let coin1 = Math.floor(Math.random() * 2);
+            let coin2 = Math.floor(Math.random() * 2);
+            let coin3 = Math.floor(Math.random() * 2);
+            let totalStatus = coin1 + coin2 + coin3;
+            
+            let lineType = ""; 
+            let changeSign = ""; 
+            let name = "";
+            let binaryCode = ""; // 記錄 0 或 1
+
+            if (totalStatus === 3) {
+                lineType = "yang"; changeSign = "O"; name = "老陽 (變)"; binaryCode = "1";
+            } else if (totalStatus === 0) {
+                lineType = "yin";  changeSign = "X"; name = "老陰 (變)"; binaryCode = "0";
+            } else if (totalStatus === 2) {
+                lineType = "yang"; changeSign = "";  name = "少陽";       binaryCode = "1";
+            } else if (totalStatus === 1) {
+                lineType = "yin";  changeSign = "";  name = "少陰";       binaryCode = "0";
+            }
+
+            guaRecords.push({ type: lineType, sign: changeSign, text: name, code: binaryCode });
+            renderGua();
+        }
+
+        function renderGua() {
+            const display = document.getElementById('gua-display');
+            const statusText = document.getElementById('status-text');
+            const castBtn = document.getElementById('cast-btn');
+            
+            if(guaRecords.length === 1) display.innerHTML = "";
+
+            let currentCount = guaRecords.length;
+            let latestLine = guaRecords[currentCount - 1];
+
+            let row = document.createElement('div');
+            row.className = 'line-row';
+
+            let lineGraph = document.createElement('div');
+            if (latestLine.type === 'yang') {
+                lineGraph.className = 'yang';
+            } else {
+                lineGraph.className = 'yin';
+                lineGraph.innerHTML = '<div class="part"></div><div class="part"></div>';
+            }
+
+            row.appendChild(lineGraph);
+            row.innerHTML = `<span style="width:50px; text-align:left; color:#999;">${lineNames[currentCount-1]}</span>` 
+                            + row.innerHTML 
+                            + `<span class="change-symbol">${latestLine.sign}</span>`
+                            + `<span class="line-text">${latestLine.text}</span>`;
+            
+            display.appendChild(row);
+
+            if (currentCount < maxLines) {
+                statusText.innerText = `目前進度：第 ${currentCount + 1} 爻 (${lineNames[currentCount]})`;
+            } else {
+                statusText.innerText = "🎉 起卦完成！";
+                castBtn.innerText = "已完成六爻起卦";
+                castBtn.disabled = true;
+                
+                // 【核心升級】當滿六爻，組裝密碼並查表
+                checkGuaResult();
+            }
+        }
+
+        function checkGuaResult() {
+            // 把六個爻的 code (0或1) 連接成一串字串，例如 "111111"
+            // 注意：易經是由下往上讀，所以我們要按照初爻到上爻的順序組合
+            let finalCode = guaRecords.map(item => item.code).join('');
+            
+            const resultBox = document.getElementById('result-box');
+            const guaName = document.getElementById('gua-name');
+            const guaSummary = document.getElementById('gua-summary');
+            const guaDesc = document.getElementById('gua-desc');
+
+            // 去密碼本裡找資料
+            let guaData = ichingDatabase[finalCode];
+
+            if (guaData) {
+                guaName.innerText = "本卦：📍 " + guaData.name;
+                guaSummary.innerText = guaData.summary;
+                guaDesc.innerText = guaData.desc;
+            } else {
+                // 如果搖出來的卦不在我們簡化的 4 個示範卦裡
+                guaName.innerText = "起卦成功！";
+                guaSummary.innerText = "尚未匯入此卦資料";
+                guaDesc.innerText = `你搖出來的本卦密碼是【${finalCode}】。因為這只是測試版，你可以把這組號碼丟給 AI，請它幫你解卦！`;
+            }
+
+            // 把解答框秀出來
+            resultBox.style.display = "block";
+        }
+
+        function resetGua() {
+            guaRecords = [];
+            document.getElementById('gua-display').innerHTML = '<div style="color: #aaa; text-align: center; width: 100%; line-height: 150px;">暫無卦象，請點擊下方按鈕起卦</div>';
+            document.getElementById('status-text').innerText = "目前進度：第 1 爻 (初爻)";
+            document.getElementById('result-box').style.display = "none";
+            let btn = document.getElementById('cast-btn');
+            btn.innerText = "🪙 擲三個硬幣";
+            btn.disabled = false;
+            initBazi();
+        }
+
+        initBazi();
+    </script>
+
+</body>
+</html>
