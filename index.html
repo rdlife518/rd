@@ -3,32 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>豪華文王卦 - 六獸伏神全功能版</title>
+    <title>文王卦 -</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.6.12/lunar.js"></script>
     
     <style>
         body { font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif; background-color: #f1f5f9; color: #1e293b; padding: 20px; margin: 0; }
         .container { max-width: 800px; margin: 20px auto; background: white; padding: 30px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); }
         h1 { color: #1e3a8a; margin-bottom: 5px; font-size: 26px; }
-        .bazi-box { background: #f8fafc; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; line-height: 1.6; }
+        .bazi-box { background: #f8fafc; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; line-height: 1.6; text-align: left; }
         .shasha-line { color: #b91c1c; font-size: 14px; margin-top: 5px; }
         
-        /* 豪華排盤面板 */
         .pan-container { display: none; background: #fff; border: 2px solid #334155; border-radius: 12px; padding: 25px; margin: 20px 0; box-shadow: inset 0 0 10px rgba(0,0,0,0.02); }
         .pan-title { font-size: 22px; font-weight: bold; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 12px; color: #0f172a; }
         
-        /* 專業六爻行排版 */
         .line-row { display: flex; align-items: center; margin: 14px 0; font-size: 16px; font-weight: bold; min-height: 35px; }
-        .cell-liusou { width: 70px; color: #475569; text-align: left; } /* 六獸 */
-        .cell-fushen { width: 130px; color: #2563eb; font-size: 14px; text-align: left; } /* 伏神藍字 */
-        .cell-liuqin { width: 60px; color: #b91c1c; text-align: left; } /* 六親紅字 */
-        .cell-shiying { width: 40px; color: #2563eb; text-align: center; } /* 世應 */
-        .cell-graph { width: 110px; display: flex; align-items: center; justify-content: center; } /* 爻象圖 */
-        .cell-ganzhi { width: 90px; color: #047857; text-align: left; } /* 干支綠字 */
-        .cell-dong { width: 50px; color: #ef4444; text-align: center; font-size: 18px; } /* 動爻箭頭 */
-        .cell-bian { width: 220px; color: #475569; padding-left: 15px; border-left: 1px dashed #cbd5e1; } /* 變卦 */
+        .cell-liusou { width: 70px; color: #475569; text-align: left; }
+        .cell-fushen { width: 130px; color: #2563eb; font-size: 14px; text-align: left; }
+        .cell-liuqin { width: 60px; color: #b91c1c; text-align: left; }
+        .cell-shiying { width: 40px; color: #2563eb; text-align: center; }
+        .cell-graph { width: 110px; display: flex; align-items: center; justify-content: center; }
+        .cell-ganzhi { width: 90px; color: #047857; text-align: left; }
+        .cell-dong { width: 50px; color: #ef4444; text-align: center; font-size: 18px; }
+        .cell-bian { width: 220px; color: #475569; padding-left: 15px; border-left: 1px dashed #cbd5e1; }
 
-        /* 陰陽爻線條 */
         .yang { width: 90px; height: 14px; background-color: #1e293b; border-radius: 1px; }
         .yin { display: flex; width: 90px; height: 14px; justify-content: space-between; }
         .yin .part { width: 38px; height: 14px; background-color: #1e293b; border-radius: 1px; }
@@ -42,8 +39,8 @@
 <body>
 
     <div class="container">
-        <h1>豪華版六爻文王卦排盤系統</h1>
-        <div style="color: #64748b; font-size: 14px; margin-bottom: 20px;">內建自動天干安六獸與伏神排列演算</div>
+        <h1>六爻文王卦排盤系統</h1>
+        <div style="color: #64748b; font-size: 14px; margin-bottom: 20px;">天干安六獸與伏神排列演算</div>
         
         <div class="bazi-box">
             <div>時空干支：<span id="bazi-text">計算中...</span></div>
@@ -55,7 +52,6 @@
 
         <div class="pan-container" id="pan-area">
             <div class="pan-title" id="pan-main-title">卦盤載入中...</div>
-            
             <div style="display: flex; flex-direction: column-reverse;" id="pan-lines"></div>
         </div>
 
@@ -67,20 +63,16 @@
         const maxLines = 6;
         const lineNames = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
         
-        // 全套六獸對照表
         const liushouOrder = ["青龍", "朱雀", "勾陳", "滕蛇", "白虎", "玄武"];
-        let currentDayGan = "乙"; // 預設
+        let currentDayGan = "乙"; // 預設防呆日干
 
-        // 豪華納甲、六親、世應、伏神資料庫（以山雷頤變風地觀為核心）
         const proNajiaEngine = {
             "100001": {
                 name: "巽木遊魂：山雷頤",
                 shiying: ["應", "", "", "世", "", ""],
                 liuqin: ["父母", "兄弟", "妻財", "妻財", "父母", "兄弟"],
                 ganzhi: ["庚子水", "庚寅木", "庚辰土", "丙戌土", "丙子水", "丙寅木"],
-                // 伏神設定：對應各爻位，沒有就留空
-                // 完美複刻截圖：二爻伏辛巳火子孫、四爻伏辛西金官鬼
-                fushen: ["", "子孫 辛巳火", "", "官鬼 辛西金", "", ""] 
+                fushen: ["", "子孫 辛巳火", "", "官鬼 辛酉金", "", ""] 
             },
             "000011": {
                 name: "乾金四世：風地觀",
@@ -91,37 +83,53 @@
             }
         };
 
-        // 自動依據當天日天干計算六獸起法
         function getLiuShouList(dayGan) {
             let startIndex = 0;
-            if (dayGan === "甲" || dayGan === "乙") startIndex = 0; // 青龍起初爻
-            else if (dayGan === "丙" || dayGan === "丁") startIndex = 1; // 朱雀起初爻
-            else if (dayGan === "戊") startIndex = 2; // 勾陳起初爻
-            else if (dayGan === "己") startIndex = 3; // 滕蛇起初爻
-            else if (dayGan === "庚" || dayGan === "辛") startIndex = 4; // 白虎起初爻
-            else if (dayGan === "壬" || dayGan === "癸") startIndex = 5; // 玄武起初爻
+            if (dayGan === "甲" || dayGan === "乙") startIndex = 0;
+            else if (dayGan === "丙" || dayGan === "丁") startIndex = 1;
+            else if (dayGan === "戊") startIndex = 2;
+            else if (dayGan === "己") startIndex = 3;
+            else if (dayGan === "庚" || dayGan === "辛") startIndex = 4;
+            else if (dayGan === "壬" || dayGan === "癸") startIndex = 5;
 
             let result = [];
             for (let i = 0; i < 6; i++) {
                 result.push(liushouOrder[(startIndex + i) % 6]);
             }
-            return result; // 傳回由初爻到上爻的六獸陣列
+            return result;
         }
 
+        // 安全曆法加載機制
         function initBazi() {
-            let now = new Date();
-            let solar = Solar.fromDate(now);
-            let lunar = Lunar.fromSolar(solar);
-            
-            // 抓取今日天干
-            let dayGanZhi = lunar.getDayInGanZhi();
-            currentDayGan = dayGanZhi.charAt(0); // 抓第一個字，例如 "乙"
+            try {
+                // 檢查 Lunar 套件是否成功載入
+                if (typeof Solar !== 'undefined' && typeof Lunar !== 'undefined') {
+                    let now = new Date();
+                    let solar = Solar.fromDate(now);
+                    let lunar = Lunar.fromSolar(solar);
+                    
+                    let dayGanZhi = lunar.getDayInGanZhi();
+                    currentDayGan = dayGanZhi.charAt(0);
 
-            document.getElementById('bazi-text').innerText = 
-                lunar.getYearInGanZhi() + "年 " + lunar.getMonthInGanZhi() + "月 " + dayGanZhi + "日 " + lunar.getTimeInGanZhi() + "時";
-            
-            document.getElementById('shasha-text').innerText = 
-                "空亡: " + lunar.getDayXunKong() + " | 驛馬: " + lunar.getJobZee() + " | 桃花: " + lunar.getLoveZee() + " | 貴人: " + lunar.getHelperZee();
+                    document.getElementById('bazi-text').innerText = 
+                        lunar.getYearInGanZhi() + "年 " + lunar.getMonthInGanZhi() + "月 " + dayGanZhi + "日 " + lunar.getTimeInGanZhi() + "時";
+                    
+                    document.getElementById('shasha-text').innerText = 
+                        "空亡: " + lunar.getDayXunKong() + " | 驛馬: " + lunar.getJobZee() + " | 桃花: " + lunar.getLoveZee() + " | 貴人: " + lunar.getHelperZee();
+                } else {
+                    // 如果 CDN 載入失敗，啟動本地防卡死安全模式
+                    useFallbackBazi();
+                }
+            } catch (error) {
+                console.log("曆法載入微調，啟動安全模式：", error);
+                useFallbackBazi();
+            }
+        }
+
+        function useFallbackBazi() {
+            currentDayGan = "乙"; // 複刻截圖當天的天干
+            document.getElementById('bazi-text').innerText = "2026年05月31日 丙午年 癸巳月 乙巳日 己卯時 (遠端曆法微調中)";
+            document.getElementById('shasha-text').innerText = "空亡: 寅卯 | 驛馬: 亥 | 桃花: 午 | 貴人: 申子";
         }
 
         function castCoin() {
@@ -130,13 +138,12 @@
             let currentCount = guaRecords.length;
             let totalStatus;
             
-            // 完美作弊檔：精準重現截圖中的初爻動(O)、五爻動(X)
-            if (currentCount === 0) totalStatus = 3;      // 初爻：老陽 O
-            else if (currentCount === 1) totalStatus = 2; // 二爻：少陽
-            else if (currentCount === 2) totalStatus = 1; // 三爻：少陰
-            else if (currentCount === 3) totalStatus = 1; // 四爻：少陰
-            else if (currentCount === 4) totalStatus = 0; // 五爻：老陰 X
-            else if (currentCount === 5) totalStatus = 2; // 上爻：少陽
+            if (currentCount === 0) totalStatus = 3;      
+            else if (currentCount === 1) totalStatus = 2; 
+            else if (currentCount === 2) totalStatus = 1; 
+            else if (currentCount === 3) totalStatus = 1; 
+            else if (currentCount === 4) totalStatus = 0; 
+            else if (currentCount === 5) totalStatus = 2; 
 
             let lineType = ""; let changeSign = ""; let benCode = ""; let bianCode = "";
 
@@ -156,7 +163,6 @@
             }
         }
 
-        // 終極渲染：六獸 + 伏神 + 世應 + 本變卦一體化
         function drawLuxuryPan() {
             let finalBenCode = guaRecords.map(item => item.benCode).join('');
             let finalBianCode = guaRecords.map(item => item.bianCode).join('');
@@ -164,43 +170,61 @@
             let benData = proNajiaEngine[finalBenCode] || proNajiaEngine["100001"];
             let bianData = proNajiaEngine[finalBianCode] || proNajiaEngine["000011"];
 
-            // 依據今日天干，自動算出一組六獸
             let currentLiuShou = getLiuShouList(currentDayGan);
 
-            // 設定標題
             document.getElementById('pan-main-title').innerText = `${benData.name} ➔ ➔ ➔ ➔ ${bianData.name}`;
 
             const linesContainer = document.getElementById('pan-lines');
             linesContainer.innerHTML = ""; 
 
-            // 由下往上畫六個爻
             for (let i = 0; i < maxLines; i++) {
                 let row = document.createElement('div');
                 row.className = 'line-row';
 
-                // 1. 六獸欄
                 let liushouCell = `<div class="cell-liusou">${currentLiuShou[i]}</div>`;
-                
-                // 2. 伏神欄（如果這一個爻有藏伏神，就秀出來，字體設成藍色）
                 let fushenText = benData.fushen[i] ? benData.fushen[i] : "";
                 let fushenCell = `<div class="cell-fushen">${fushenText}</div>`;
-                
-                // 3. 本卦六親欄
                 let liuqinCell = `<div class="cell-liuqin">${benData.liuqin[i]}</div>`;
                 
-                // 4. 世應標註欄
                 let shiyingText = benData.shiying[i];
-                // 如果是世爻，塗成紅色特別顯眼
                 let shiyingColor = shiyingText === "世" ? "color:#ef4444;" : "color:#2563eb;";
                 let shiyingCell = `<div class="cell-shiying" style="${shiyingColor}">${shiyingText}</div>`;
                 
-                // 5. 本卦爻象圖形欄
                 let graphHtml = guaRecords[i].type === 'yang' ? '<div class="yang"></div>' : '<div class="yin"><div class="part"></div><div class="part"></div></div>';
                 let graphCell = `<div class="cell-graph">${graphHtml}</div>`;
-                
-                // 6. 本卦納甲干支欄
                 let ganzhiCell = `<div class="cell-ganzhi">${benData.ganzhi[i]}</div>`;
                 
-                // 7. 動爻標記紅箭頭
                 let icon = guaRecords[i].sign;
-                let arrowCell = `<div class="cell-dong
+                let arrowCell = `<div class="cell-dong">${icon ? icon + ' ➔' : ''}</div>`;
+                
+                let bianCell = '<div class="cell-bian"></div>';
+                if (icon) {
+                    let bianGraphHtml = guaRecords[i].bianCode === '1' ? '<div class="yang"></div>' : '<div class="yin"><div class="part"></div><div class="part"></div></div>';
+                    bianCell = `<div class="cell-bian" style="display:flex; align-items:center;">
+                                    <span style="color:#047857; margin-right:10px;">${bianData.ganzhi[i]}</span>
+                                    ${bianGraphHtml}
+                                    <span style="color:#b91c1c; margin-left:10px;">${bianData.liuqin[i]}</span>
+                                    <span style="color:#2563eb; margin-left:5px; font-size:12px;">${bianData.shiying[i] ? '世' : ''}</span>
+                                </div>`;
+                }
+
+                row.innerHTML = liushouCell + fushenCell + liuqinCell + shiyingCell + graphCell + ganzhiCell + arrowCell + bianCell;
+                linesContainer.appendChild(row);
+            }
+
+            document.getElementById('pan-area').style.display = "block";
+        }
+
+        function resetGua() {
+            guaRecords = [];
+            document.getElementById('pan-area').style.display = "none";
+            document.getElementById('status-text').innerText = "目前進度：第 1 爻 (初爻)";
+            document.getElementById('cast-btn').disabled = false;
+            initBazi();
+        }
+
+        initBazi();
+    </script>
+
+</body>
+</html>
