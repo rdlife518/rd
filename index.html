@@ -3,26 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>豪華文王卦 - AI 智能解卦版</title>
+    <title>豪華文王卦 - AI智能解卦版</title>
     <style>
         :root { --primary: #2563eb; --success: #10b981; --ai-purple: #7c3aed; --bg: #f1f5f9; --text: #1e293b; }
         body { font-family: "Microsoft JhengHei", -apple-system, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
         .container { max-width: 800px; width: 100%; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; }
         h1 { color: #1e3a8a; margin: 0 0 10px 0; font-size: 26px; }
         .subtitle { color: #64748b; font-size: 14px; margin-bottom: 25px; }
-        
-        /* 階段一：大門輸入 */
         #welcome-stage { text-align: left; max-width: 500px; margin: 0 auto; }
         .form-group { margin-bottom: 20px; }
         label { display: block; font-weight: bold; margin-bottom: 8px; color: #334155; }
         input[type="text"] { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; }
-        
-        /* 階段二：起卦室 */
         #divination-stage { display: none; }
         .bazi-box { background: #f8fafc; padding: 15px; border-radius: 10px; font-weight: bold; font-size: 14px; margin-bottom: 20px; border: 1px solid #e2e8f0; text-align: left; line-height: 1.6; }
         .user-summary { background: #eff6ff; color: #1e40af; padding: 12px 15px; border-radius: 8px; font-size: 14px; margin-bottom: 15px; text-align: left; border-left: 4px solid var(--primary); font-weight: bold; }
-        
-        /* 六爻盤面 */
         .pan-container { display: none; background: #fff; border: 2px solid #334155; border-radius: 16px; padding: 25px; margin: 20px 0; }
         .pan-title { font-size: 20px; font-weight: bold; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 12px; }
         .line-row { display: flex; align-items: center; margin: 14px 0; font-size: 16px; font-weight: bold; min-height: 35px; }
@@ -34,18 +28,160 @@
         .cell-ganzhi { width: 90px; color: #047857; text-align: left; }
         .cell-dong { width: 50px; color: #ef4444; text-align: center; }
         .cell-bian { width: 220px; color: #475569; padding-left: 15px; border-left: 1px dashed #cbd5e1; }
-
         .yang { width: 90px; height: 14px; background-color: #1e293b; }
         .yin { display: flex; width: 90px; height: 14px; justify-content: space-between; }
         .yin .part { width: 38px; height: 14px; background-color: #1e293b; }
-
-        /* 按鈕視覺 */
         .btn { background-color: var(--primary); color: white; border: none; padding: 15px 30px; font-size: 18px; border-radius: 12px; cursor: pointer; font-weight: bold; width: 100%; transition: all 0.2s; }
         .btn:hover { background-color: #1d4ed8; }
         .btn-cast { background-color: var(--success); }
         .btn-cast:hover { background-color: #059669; }
         .btn-ai { background-color: var(--ai-purple); margin-top: 20px; }
         .btn-ai:hover { background-color: #6d28d9; }
-        
-        /* AI 解卦艙 */
-        .ai-section { display: none; margin-top: 25px; border: 2px dashed var(--ai-purple); border-radius:
+        .ai-section { display: none; margin-top: 25px; border: 2px dashed var(--ai-purple); border-radius: 16px; padding: 25px; background: #faf5ff; text-align: left; }
+        .ai-title { font-size: 18px; color: var(--ai-purple); font-weight: bold; margin-bottom: 12px; }
+        .ai-content { font-size: 15px; line-height: 1.7; color: #3b0764; white-space: pre-line; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div id="welcome-stage">
+            <div style="text-align: center;">
+                <h1>豪華六爻文王卦占卜</h1>
+                <div class="subtitle">第一步：心念合一 · 輸入訴求</div>
+            </div>
+            <div class="form-group">
+                <label for="user-question">🔮 您想請示的問題是？</label>
+                <input type="text" id="user-question" placeholder="例如：今年換工作發展順利嗎？">
+            </div>
+            <button class="btn" onclick="enterDivination()">進入占卜儀式 ➔</button>
+        </div>
+
+        <div id="divination-stage">
+            <h1>豪華版六爻文王卦排盤系統</h1>
+            <div class="user-summary" id="summary-display"></div>
+            <div class="bazi-box">
+                <div>時空干支：2026年05月31日 丙午年 癸巳月 乙巳日 己卯時</div>
+                <div style="color: #b91c1c; font-size: 13px; margin-top: 4px;">空亡: 寅卯 | 驛馬: 亥 | 桃花: 午 | 貴人: 申子</div>
+            </div>
+            <h3 id="status-text">目前進度：第 1 爻 (初爻)</h3>
+            <button id="cast-btn" class="btn btn-cast" onclick="castCoin()">🪙 誠心求卦：擲三個硬幣（連續按 6 次）</button>
+
+            <div class="pan-container" id="pan-area">
+                <div class="pan-title" id="pan-main-title">卦盤載入中...</div>
+                <div style="display: flex; flex-direction: column-reverse;" id="pan-lines"></div>
+                <button id="ai-btn" class="btn btn-ai" onclick="triggerAISolve()">✨ 召喚 AI 易經大師 · 線上解卦</button>
+                <div class="ai-section" id="ai-box">
+                    <div class="ai-title">🔮 AI 易經大師 智慧開示：</div>
+                    <div class="ai-content" id="ai-text">大師正在觀看您的時空卦象，請稍候...</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let guaRecords = [];
+        const maxLines = 6;
+        const lineNames = ["初爻", "二爻", "三爻", "四爻", "五爻", "上爻"];
+        let userQuestion = "";
+
+        const proNajiaEngine = {
+            "100001": { name: "巽木遊魂：山雷頤", shiying: ["應", "", "", "世", "", ""], liuqin: ["父母", "兄弟", "妻財", "妻財", "父母", "兄弟"], ganzhi: ["庚子水", "庚寅木", "庚辰土", "丙戌土", "丙子水", "丙寅木"], fushen: ["", "子孫 辛巳火", "", "官鬼 辛酉金", "", ""] },
+            "000011": { name: "乾金四世：風地觀", shiying: ["", "", "", "世", "", "應"], liuqin: ["父母", "官鬼", "妻財", "兄弟", "子孫", "兄弟"], ganzhi: ["乙未土", "乙巳火", "乙卯木", "辛未土", "辛巳火", "辛卯木"], fushen: ["", "", "", "", "", ""] },
+            "111111": { name: "乾為天", shiying: ["", "", "應", "", "", "世"], liuqin: ["父母", "兄弟", "官鬼", "妻財", "子孫", "兄弟"], ganzhi: ["甲子水", "甲寅木", "甲辰土", "壬午火", "壬申金", "壬戌土"], fushen: [] },
+            "000000": { name: "坤為地", shiying: ["", "", "應", "", "", "世"], liuqin: ["妻財", "兄弟", "官鬼", "父母", "兄弟", "子孫"], ganzhi: ["乙未土", "乙巳火", "乙卯木", "癸丑土", "癸亥水", "癸酉金"], fushen: [] }
+        };
+
+        function enterDivination() {
+            const qInput = document.getElementById('user-question');
+            if (!qInput.value.trim()) { alert("📢 請先輸入您的問題！"); return; }
+            userQuestion = qInput.value;
+            document.getElementById('summary-display').innerHTML = `<strong>請示所求：</strong>「${userQuestion}」`;
+            document.getElementById('welcome-stage').style.display = "none";
+            document.getElementById('divination-stage').style.display = "block";
+        }
+
+        function castCoin() {
+            if (guaRecords.length >= maxLines) return;
+            let coin1 = Math.floor(Math.random() * 2), coin2 = Math.floor(Math.random() * 2), coin3 = Math.floor(Math.random() * 2);
+            let totalStatus = coin1 + coin2 + coin3;
+            let lineType = "", changeSign = "", benCode = "", bianCode = "";
+
+            if (totalStatus === 3) { lineType = "yang"; changeSign = "O"; benCode = "1"; bianCode = "0"; } 
+            else if (totalStatus === 0) { lineType = "yin";  changeSign = "X"; benCode = "0"; bianCode = "1"; } 
+            else if (totalStatus === 2) { lineType = "yang"; changeSign = "";  benCode = "1"; bianCode = "1"; } 
+            else if (totalStatus === 1) { lineType = "yin";  changeSign = "";  benCode = "0"; bianCode = "0"; }
+
+            guaRecords.push({ type: lineType, sign: changeSign, benCode: benCode, bianCode: bianCode });
+            
+            if (guaRecords.length < maxLines) {
+                document.getElementById('status-text').innerText = `目前進度：第 ${guaRecords.length + 1} 爻 (${lineNames[guaRecords.length]})`;
+            } else {
+                document.getElementById('status-text').innerText = "🎉 六爻皆滿！排盤完畢";
+                document.getElementById('cast-btn').disabled = true;
+                drawLuxuryPan();
+            }
+        }
+
+        function getGuaDetails(binaryCode) {
+            if (proNajiaEngine[binaryCode]) return proNajiaEngine[binaryCode];
+            return {
+                name: "周易隨機卦象", shiying: ["世", "", "", "應", "", ""], liuqin: ["父母", "兄弟", "妻財", "官鬼", "子孫", "兄弟"], ganzhi: ["甲子水", "甲寅木", "甲辰土", "壬午火", "壬申金", "壬戌土"], fushen: ["", "", "", "", "", ""]
+            };
+        }
+
+        function drawLuxuryPan() {
+            let finalBenCode = guaRecords.map(item => item.benCode).join('');
+            let finalBianCode = guaRecords.map(item => item.bianCode).join('');
+            let benData = getGuaDetails(finalBenCode), bianData = getGuaDetails(finalBianCode);
+            let currentLiuShou = ["青龍", "朱雀", "勾陳", "滕蛇", "白虎", "玄武"];
+
+            document.getElementById('pan-main-title').innerText = `${benData.name} ➔ ${bianData.name}`;
+            const linesContainer = document.getElementById('pan-lines');
+            linesContainer.innerHTML = ""; 
+
+            for (let i = 0; i < maxLines; i++) {
+                let row = document.createElement('div');
+                row.className = 'line-row';
+                row.innerHTML = `<div class="cell-liusou">${currentLiuShou[i]}</div>
+                                 <div class="cell-fushen">${benData.fushen[i] || ""}</div>
+                                 <div class="cell-liuqin">${benData.liuqin[i]}</div>
+                                 <div class="cell-shiying" style="${benData.shiying[i]==='世'?'color:#ef4444;':'color:#2563eb;'}">${benData.shiying[i]||""}</div>
+                                 <div class="cell-graph">${guaRecords[i].type==='yang'?'<div class="yang"></div>':'<div class="yin"><div class="part"></div><div class="part"></div></div>'}</div>
+                                 <div class="cell-ganzhi">${benData.ganzhi[i]}</div>
+                                 <div class="cell-dong">${guaRecords[i].sign ? guaRecords[i].sign + ' ➔' : ''}</div>`;
+                
+                if (guaRecords[i].sign) {
+                    row.innerHTML += `<div class="cell-bian" style="display:flex; align-items:center;">
+                                        <span style="color:#047857; margin-right:10px;">${bianData.ganzhi[i]}</span>
+                                        ${guaRecords[i].bianCode==='1'?'<div class="yang"></div>':'<div class="yin"><div class="part"></div><div class="part"></div></div>'}
+                                        <span style="color:#b91c1c; margin-left:10px;">${bianData.liuqin[i]}</span>
+                                      </div>`;
+                } else { row.innerHTML += `<div class="cell-bian"></div>`; }
+                linesContainer.appendChild(row);
+            }
+            document.getElementById('pan-area').style.display = "block";
+        }
+
+        function triggerAISolve() {
+            document.getElementById('ai-btn').disabled = true;
+            document.getElementById('ai-btn').innerText = "🔮 大師正在入定觀象中...";
+            document.getElementById('ai-box').style.display = "block";
+            
+            let fullReply = `【AI 大師斷曰】：\n信士您好！您今日求問「${userQuestion}」，時空交感，卦盤已成。\n\n根據六爻大數據分析：\n1. 【現狀診斷】：世爻代表您自己。目前您對於這件事內心充滿期待，但周圍環境存在許多口舌紛擾，這讓您有些焦慮和看不清方向。\n\n2. 【財官吉凶】：目前雖然開局有些阻礙、甚至會遇到競爭對手，但只要您按兵不動、守住誠信底線，事情在接下來的月令交替時，會迎來極大的反轉空間。\n\n3. 【大師指引】：主動求變不如順應局勢。近期不宜做重大的資金投入或口頭承諾。保持低調、等待空亡出空的時機，自然會有貴人主動登門相助。\n\n祝您心想事成，逢凶化吉！`;
+            
+            let currentText = "", index = 0;
+            let timer = setInterval(() => {
+                if (index < fullReply.length) {
+                    currentText += fullReply.charAt(index);
+                    document.getElementById('ai-text').innerText = currentText;
+                    index++;
+                } else {
+                    clearInterval(timer);
+                    document.getElementById('ai-btn').innerText = "✨ 解卦完畢 · 感謝開示";
+                }
+            }, 30);
+        }
+    </script>
+</body>
+</html>
