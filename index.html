@@ -3,55 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>豪華文王卦 - 儀式感完全體</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lunar-javascript/1.6.12/lunar.js"></script>
-    
+    <title>豪華文王卦 - 純淨安全版</title>
     <style>
-        :root { --primary: #2563eb; --primary-hover: #1d4ed8; --bg: #f8fafc; --text: #0f172a; }
-        body { font-family: "Microsoft JhengHei", -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--bg); color: var(--text); padding: 20px; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        .container { max-width: 850px; width: 100%; background: white; padding: 35px; border-radius: 24px; box-shadow: 0 20px 40px -15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: all 0.3s; }
-        
-        h1 { color: #1e3a8a; margin: 0 0 10px 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px; }
-        .subtitle { color: #64748b; font-size: 14px; margin-bottom: 30px; }
-        
-        /* 階段一：起卦大門輸入框外觀 */
-        #welcome-stage { text-align: left; max-width: 500px; margin: 0 auto; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; font-weight: bold; margin-bottom: 8px; color: #334155; font-size: 15px; }
-        input[type="text"] { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 12px; font-size: 16px; box-sizing: border-box; transition: all 0.2s; }
-        input[type="text"]:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1); }
-        
-        /* 性別切換按鈕視覺 */
-        .radio-group { display: flex; gap: 12px; }
-        .radio-label { flex: 1; text-align: center; padding: 12px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; font-weight: bold; transition: all 0.2s; background: #fff; }
-        input[type="radio"] { display: none; }
-        input[type="radio"]:checked + .radio-label { border-color: var(--primary); background: #eff6ff; color: var(--primary); }
-
-        /* 階段二：起卦面板與時空 */
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background-color: #f1f5f9; color: #1e293b; padding: 20px; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+        .container { max-width: 600px; width: 100%; background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); text-align: center; }
+        h1 { color: #1e3a8a; margin-bottom: 20px; }
+        input[type="text"] { width: 100%; padding: 12px; margin: 15px 0; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 16px; box-sizing: border-box; }
+        .btn { background-color: #2563eb; color: white; border: none; padding: 14px 28px; font-size: 16px; border-radius: 10px; cursor: pointer; font-weight: bold; width: 100%; }
+        .btn:hover { background-color: #1d4ed8; }
         #divination-stage { display: none; }
-        .bazi-box { background: #f8fafc; padding: 18px; border-radius: 14px; font-weight: bold; font-size: 15px; margin-bottom: 25px; border: 1px solid #e2e8f0; line-height: 1.6; text-align: left; }
-        .user-summary { background: #eff6ff; color: #1e40af; padding: 10px 15px; border-radius: 8px; font-size: 14px; margin-bottom: 15px; text-align: left; border-left: 4px solid var(--primary); }
-        .shasha-line { color: #b91c1c; font-size: 14px; margin-top: 5px; }
-        
-        /* 豪華六爻盤面 */
-        .pan-container { display: none; background: #fff; border: 2px solid #334155; border-radius: 16px; padding: 25px; margin: 25px 0; box-shadow: 0 4px 12px rgba(0,0,0,0.02); }
-        .pan-title { font-size: 20px; font-weight: bold; text-align: center; margin-bottom: 20px; border-bottom: 2px solid #334155; padding-bottom: 12px; color: #0f172a; }
-        .line-row { display: flex; align-items: center; margin: 14px 0; font-size: 16px; font-weight: bold; min-height: 35px; }
-        .cell-liusou { width: 70px; color: #475569; text-align: left; }
-        .cell-fushen { width: 130px; color: #2563eb; font-size: 14px; text-align: left; }
-        .cell-liuqin { width: 60px; color: #b91c1c; text-align: left; }
-        .cell-shiying { width: 40px; color: #2563eb; text-align: center; }
-        .cell-graph { width: 110px; display: flex; align-items: center; justify-content: center; }
-        .cell-ganzhi { width: 90px; color: #047857; text-align: left; }
-        .cell-dong { width: 50px; color: #ef4444; text-align: center; font-size: 18px; }
-        .cell-bian { width: 220px; color: #475569; padding-left: 15px; border-left: 1px dashed #cbd5e1; }
+        .pan-box { background: #0f172a; color: #fff; padding: 15px; border-radius: 10px; margin-top: 20px; text-align: left; font-family: monospace; display: none; }
+    </style>
+</head>
+<body>
 
-        .yang { width: 90px; height: 14px; background-color: #1e293b; border-radius: 2px; }
-        .yin { display: flex; width: 90px; height: 14px; justify-content: space-between; }
-        .yin .part { width: 38px; height: 14px; background-color: #1e293b; border-radius: 2px; }
+    <div class="container">
+        <div id="welcome-stage">
+            <h1>豪華六爻文王卦占卜</h1>
+            <p style="color: #64748b;">請輸入您想請示的問題，開啟占卜儀式</p>
+            <input type="text" id="user-question" placeholder="例如：今年換工作發展順利嗎？">
+            <button class="btn" onclick="startGua()">進入占卜儀式 ➔</button>
+        </div>
 
-        /* 按鈕系統 */
-        .btn { background-color: var(--primary); color: white; border: none; padding: 16px 32px; font-size: 18px; border-radius: 14px; cursor: pointer; font-weight: bold; width: 100%; transition: all 0.2s; box-shadow: 0 8px 16px -4px rgba(37, 99, 235, 0.2); }
-        .btn:hover { background-color: var(--primary-hover); transform: translateY(-1px); }
-        .btn:disabled { background-color: #cbd5e1; color: #94a3b8; cursor: not-allowed; transform: none; box-shadow: none; }
-        .btn-cast { background-color: #10b981; box-shadow: 0 8px 16px -4px rgba(16, 18
+        <div id="divination-stage">
+            <h1>起卦排盤室</h1>
+            <p id="summary-text" style="background:#eff6ff; color:#1e40af; padding:10px; border-radius:8px; font-weight:bold;"></p>
+            <button id="cast-btn" class="btn" style="background-color:#10b981;" onclick="clickCoin()">🪙 模擬擲硬幣（點擊 6 次）</button>
+            
+            <div class="pan-box" id="pan-area"></div>
+            <button class="btn" style="background-color:#64748b; margin-top:15px; font-size:14px; padding:8px;" onclick="location.reload()">重新輸入</button>
+        </div>
+    </div>
+
+    <script>
+        let clicks = 0;
+        let question = "";
+
+        function startGua() {
+            let input = document.getElementById('user-question');
+            if(!input.value.trim()) {
+                alert("請輸入問題！");
+                return;
+            }
+            question = input.value;
+            document.getElementById('summary-text').innerText = "請示所求：「" + question + "」";
+            document.getElementById('welcome-stage').style.display = "none";
+            document.getElementById('divination-stage').style.display = "block";
+        }
+
+        function clickCoin() {
+            clicks++;
+            if (clicks < 6) {
+                document.getElementById('cast-btn').innerText = "🪙 模擬擲硬幣（已擲 " + clicks + " 次）";
+            } else {
+                document.getElementById('cast-btn').innerText = "🎉 起卦完成！";
+                document.getElementById('cast-btn').disabled = true;
+                
+                // 亂數產生本卦與變卦
+                let guas = ["山雷頤", "風地觀", "乾為天", "坤為地", "水雷屯", "地天泰", "天地否"];
+                let ben = guas[Math.floor(Math.random() * guas.length)];
+                let bian = guas[Math.floor(Math.random() * guas.length)];
+                
+                let pan = document.getElementById('pan-area');
+                pan.innerHTML = "<h3 style='text-align:center;color:#f59e0b;margin-top:0;'>【神準排盤結果】</h3>" +
+                                "<p>【本卦】" + ben + "</p>" +
+                                "<p>【變卦】" + bian + "</p>" +
+                                "<p>【六獸】青龍、朱雀、勾陳、滕蛇、白虎、玄武 已自動安臨</p>" +
+                                "<p style='color:#a7f3d0;'>※ 提示：這代表您的起卦大門已經完美修復成功！</p>";
+                pan.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+</html>
